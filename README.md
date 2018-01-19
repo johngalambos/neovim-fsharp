@@ -10,5 +10,7 @@ It should provide better asychronous integration with [FsAutoComplete](https://g
 Using [vim-plug](https://github.com/junegunn/vim-plug):
 
 ```
-Plug 'johngalambos/neovim-fsharp', {'do': ':UpdateRemotePlugins', 'do': './install.py' }
+Plug 'johngalambos/neovim-fsharp', { 'do': 'install.py' }
 ```
+
+Make sure to run `:UpdateRemotePlugins` after installing or updating.
