@@ -21,7 +21,7 @@ class NvimFsharp(object):
         self.vim.command('echomsg "{}"'.format(message))
 
     @neovim.autocmd(
-            'BufEnter', pattern='*.fsx',
+            'BufEnter', pattern='*.fsx,*.fs',
             eval='expand("<afile>")', sync=False)
     def autocmd_handler(self, filename):
         self.__log("Reloaded")
@@ -30,12 +30,11 @@ class NvimFsharp(object):
         self.__log("setting fsharp_dir to {}".format(fsharp_dir))
         if G.fsac is None:
             G.fsac = FSAutoComplete(self.plugin_dir, self.vim, debug=True)
-            self.__log("The service should be started!")
-        else:
-            self.__log('trying to parse the file')
-            G.fsac.parse(
-                self.vim.current.buffer.name, True,
-                self.vim.current.buffer)
+            self.__log("The service should be started! Parsing file")
+
+        G.fsac.parse(
+            self.vim.current.buffer.name, True,
+            self.vim.current.buffer)
 
     @neovim.autocmd('VimLeavePre', pattern='*', sync=False)
     def vim_leave_handler(self, filename):
@@ -45,7 +44,7 @@ class NvimFsharp(object):
     @neovim.command('FSharpGetType', range='', nargs='*', sync=False)
     def command_handler(self, args, range):
         b = self.vim.current.buffer
-        G.fsac.parse(b.name, True, b)
+        # G.fsac.parse(b.name, True, b)
         row, col = self.vim.current.window.cursor
         # TODO John
         # res = G.fsac.tooltip(b.name, row, col + 1, self.vim.eval('a:includeComments') != '0')
