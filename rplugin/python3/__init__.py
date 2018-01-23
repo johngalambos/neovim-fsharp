@@ -22,7 +22,7 @@ class NvimFsharp(object):
 
     @neovim.autocmd(
             'BufEnter', pattern='*.fsx,*.fs',
-            eval='expand("<afile>")', sync=False)
+            eval='expand("<afile>")', sync=True)
     def autocmd_handler(self, filename):
         self.__log("Reloaded")
         fsharp_dir = os.path.dirname(filename)
@@ -41,22 +41,33 @@ class NvimFsharp(object):
         self.__log('shutting down fsac')
         G.fsac.shutdown()
 
-    @neovim.command('FSharpGetType', range='', nargs='*', sync=False)
+    @neovim.command('FSharpGetType', range='', nargs='*', sync=True)
     def command_handler(self, args, range):
+        if G.fsac is None:
+            self.__log("FSAC not started yet")
+            return
+
+        # G.fsac.parse(
+        #     self.vim.current.buffer.name, True,
+        #     self.vim.current.buffer)
+
         b = self.vim.current.buffer
         # G.fsac.parse(b.name, True, b)
         row, col = self.vim.current.window.cursor
         # TODO John
         # res = G.fsac.tooltip(b.name, row, col + 1, self.vim.eval('a:includeComments') != '0')
+        # this is not synchronous
         res = G.fsac.tooltip(b.name, row, col + 1, False)
+        self.vim.out_write("I got a response\n")
+        self.vim.out_write("res {}\n".format(str(res)))
         lines = res.splitlines()
         first = ""
         if len(lines):
             first = lines[0]
         if first.startswith('Multiple') or first.startswith('type'):
-            self.vim.command('echo "%s"' % res)
+            self.vim.out_write("{0}".format(res))
         elif first.startswith('HasComments'):
-            self.vim.command('echo "%s"' % res.replace("HasComments", "", 1))
+            self.vim.out_write("{0}\n".format(res.replace("HasComments", "", 1)))
         else:
-            self.vim.command('echo "%s"' % first)
+            self.vim.out_write('{0}'.format(first))
 

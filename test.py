@@ -1,22 +1,43 @@
+import pytest
 from neovim import attach
 from time import sleep
+
 nvim = attach('child', argv=["nvim", "--embed"])
-buffer = nvim.current.buffer
-window = nvim.current.window
 firstcontent = nvim.funcs.getreg('a', 1, True)
 print('first content ' + str(firstcontent))
-nvim.command('redir @a')
-nvim.command(r'e C:\Users\john\code\vim-fsharp\install.fsx')
-sleep(5)
-window.cursor = [14, 7]
-attempts = 4
 
-while attempts > 0:
-    print('injecting command')
-    nvim.command('FSharpGetType')
+
+@pytest.fixture(scope="module")
+def nvim():
+    # fixt = { "name": "test" }
+    # return fixt
+    nvim = attach('child', argv=["nvim", "--embed"])
+    nvim.command(r'e C:\Users\john\code\vim-fsharp\install.fsx')
+    print("fixture sleep")
     sleep(5)
-    content = nvim.funcs.getreg('a', 1, True)
-    print(str(content))
-    attempts -= 1
+    print("fixture wake")
+    nvim.command('redir @a')
+    return nvim
 
-print("finished test")
+
+def eventually_has_output(nvim, output, timeout):
+    attempts = timeout
+    print("attempts {} timeout {}".format(attempts, timeout))
+
+    while attempts > 0:
+        print("inside loop attempts {} timeout {}".format(attempts, timeout))
+        content = nvim.funcs.getreg('a', 1, True)
+        print("output {} is {}".format(attempts, str(content)))
+        if content == output:
+            return True
+        attempts -= 1
+        sleep(1)
+    return False
+
+
+def test_get_type(nvim):
+    window = nvim.current.window
+    window.cursor = [14, 7]
+    nvim.command('FSharpGetType')
+    result = eventually_has_output(nvim, "type", 5)
+    assert result is True

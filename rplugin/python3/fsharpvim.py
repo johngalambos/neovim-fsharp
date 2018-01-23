@@ -35,7 +35,10 @@ class Interaction:
             self.logfile.flush()
 
     def read(self):
-        self.event.wait(self._timeOut)
+        self.logfile.write('attempting to read\n')
+        result = self.event.wait(self._timeOut)
+        if result is False:
+            self.logfile.write('msg timed out\n')
         if self.debug:
             self.logfile.write('msg received %s\n' % self.data)
         return self.data
@@ -83,7 +86,7 @@ class FSAutoComplete:
 
         self.completion = Interaction(self.p, 3, self.logfile)
         self._finddecl = Interaction(self.p, 1, self.logfile)
-        self._tooltip = Interaction(self.p, 1, self.logfile)
+        self._tooltip = Interaction(self.p, 3, self.logfile)
         self._helptext = Interaction(self.p, 1, self.logfile)
         self._errors = Interaction(self.p, 3, self.logfile)
         self._project = Interaction(self.p, 3, self.logfile)
@@ -228,11 +231,13 @@ class FSAutoComplete:
         if msg == None:
             return ""
 
+        self.__log("tt msg {}\n".format(str(msg)))  # TODO JOHN
         output_signature = ""
         for ols in msg:
             for ol in ols:
                 output_signature = output_signature + self._vim_encode(ol['Signature']) + "\n"
 
+        self.__log("output sig {}\n".format(output_signature))  # TODO JOHN
         output_comments = ""
         if include_comments:
             for ols in msg:
@@ -244,6 +249,7 @@ class FSAutoComplete:
         else:
             output = output_signature
 
+        self.__log("output {}\n".format(output))  # TODO JOHN
         return output
 
     def helptext(self, candidate, include_comments):
