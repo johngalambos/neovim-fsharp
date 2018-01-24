@@ -58,16 +58,14 @@ class NvimFsharp(object):
         # res = G.fsac.tooltip(b.name, row, col + 1, self.vim.eval('a:includeComments') != '0')
         # this is not synchronous
         res = G.fsac.tooltip(b.name, row, col + 1, False)
-        self.vim.out_write("I got a response\n")
-        self.vim.out_write("res {}\n".format(str(res)))
         lines = res.splitlines()
+        self.vim.out_write("len lines: {}\n".format(str(len(lines))))
         first = ""
         if len(lines):
             first = lines[0]
         if first.startswith('Multiple') or first.startswith('type'):
-            self.vim.out_write("{0}".format(res))
+            self.vim.out_write("{0}\n".format(res))
         elif first.startswith('HasComments'):
             self.vim.out_write("{0}\n".format(res.replace("HasComments", "", 1)))
         else:
-            self.vim.out_write('{0}'.format(first))
-
+            self.vim.out_write('{0}\n'.format(first))

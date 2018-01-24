@@ -231,13 +231,13 @@ class FSAutoComplete:
         if msg == None:
             return ""
 
-        self.__log("tt msg {}\n".format(str(msg)))  # TODO JOHN
+        # self.__log("tt msg {}\n".format(str(msg)))  # TODO JOHN
         output_signature = ""
         for ols in msg:
             for ol in ols:
                 output_signature = output_signature + self._vim_encode(ol['Signature']) + "\n"
 
-        self.__log("output sig {}\n".format(output_signature))  # TODO JOHN
+        # self.__log("output sig {}\n".format(output_signature))  # TODO JOHN
         output_comments = ""
         if include_comments:
             for ols in msg:

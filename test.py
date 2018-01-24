@@ -2,42 +2,77 @@ import pytest
 from neovim import attach
 from time import sleep
 
-nvim = attach('child', argv=["nvim", "--embed"])
-firstcontent = nvim.funcs.getreg('a', 1, True)
-print('first content ' + str(firstcontent))
+
+cleanup_func = ''':function BeforeEachTest()
+  tabnew
+  let curbufnum = eval(bufnr('%'))
+  redir => buflist
+  silent ls!
+  redir END
+  let bufnums = []
+  for buf in split(buflist, '\\n')
+    let bufnum = eval(split(buf, '[ u]')[0])
+    if bufnum != curbufnum
+      call add(bufnums, bufnum)
+    endif
+  endfor
+  if len(bufnums) > 0
+    exe 'silent bwipeout! '.join(bufnums, ' ')
+  endif
+  silent tabonly
+endfunction
+'''
 
 
 @pytest.fixture(scope="module")
 def nvim():
-    # fixt = { "name": "test" }
-    # return fixt
+    print("module level fixt")
     nvim = attach('child', argv=["nvim", "--embed"])
-    nvim.command(r'e C:\Users\john\code\vim-fsharp\install.fsx')
-    print("fixture sleep")
-    sleep(5)
-    print("fixture wake")
-    nvim.command('redir @a')
+    nvim.input(cleanup_func)
+    assert len(nvim.tabpages) == 1
+    assert len(nvim.windows) == 1
+    assert len(nvim.buffers) == 1
     return nvim
+
+
+@pytest.fixture()
+def cleanup(nvim):
+    # cleanup nvim
+    nvim.command('call BeforeEachTest()')
+    assert len(nvim.tabpages) == 1
+    assert len(nvim.windows) == 1
+    assert len(nvim.buffers) == 1
 
 
 def eventually_has_output(nvim, output, timeout):
     attempts = timeout
-    print("attempts {} timeout {}".format(attempts, timeout))
+    result = False
 
     while attempts > 0:
-        print("inside loop attempts {} timeout {}".format(attempts, timeout))
-        content = nvim.funcs.getreg('a', 1, True)
-        print("output {} is {}".format(attempts, str(content)))
+        content = nvim.funcs.getreg('a', 1, True)[-1]
         if content == output:
-            return True
-        attempts -= 1
+            result = True
+            break
         sleep(1)
-    return False
+        attempts -= 1
+    return result
 
 
-def test_get_type(nvim):
+def test_get_type(nvim, cleanup):
+    nvim.command('redir @a')
+    nvim.command(r'e C:\Users\john\code\vim-fsharp\install.fsx')
     window = nvim.current.window
     window.cursor = [14, 7]
     nvim.command('FSharpGetType')
-    result = eventually_has_output(nvim, "type", 5)
+    result = eventually_has_output(nvim, "val vimInstallDir : string", 5)
+    assert result is True
+
+
+def test_get_type2(nvim, cleanup):
+    nvim.command('redir @a')
+    nvim.command(r'e C:\Users\john\code\vim-fsharp\install.fsx')
+    window = nvim.current.window
+    window.cursor = [35, 4]
+    nvim.command('FSharpGetType')
+    result = eventually_has_output(nvim, "val Target : name:string -> body:(unit -> unit) -> unit", 5)
     assert result is True
