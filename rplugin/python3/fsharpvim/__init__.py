@@ -12,7 +12,7 @@ class NvimFsharp(object):
     def __init__(self, vim):
         self.vim = vim
         self.plugin_dir = os.path.abspath(
-                os.path.join(os.path.dirname(__file__), '..\\..\\..\\'))
+                os.path.join(os.path.dirname(__file__), '../../../'))
         self.__log('Plugin path: {}'.format(self.plugin_dir))
 
     def __log(self, message):
@@ -56,8 +56,8 @@ class NvimFsharp(object):
         # res = G.fsac.tooltip(b.name, row, col + 1, self.vim.eval('a:includeComments') != '0')
         # this is not synchronous
         res = G.fsac.tooltip(b.name, row, col + 1, False)
+        self.vim.out_write("response: {}\n".format(str(res)))
         lines = res.splitlines()
-        self.vim.out_write("len lines: {}\n".format(str(len(lines))))
         first = ""
         if len(lines):
             first = lines[0]
