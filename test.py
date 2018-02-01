@@ -40,7 +40,12 @@ endfunction
 @pytest.fixture(scope="module")
 def nvim():
     print("module level fixt")
-    nvim = attach('child', argv=["nvim", "-u", "C:\\Users\\john\\code\\neovim-fsharp\\test.vimrc", "--embed" ])
+    nvim = attach(
+            'child',
+            argv=[
+                "nvim", "-u",
+                "C:\\Users\\john\\code\\neovim-fsharp\\test.vimrc",
+                "--embed"])
     nvim.input(cleanup_func)
     print("config and cleanup should be done")
     assert len(nvim.tabpages) == 1
