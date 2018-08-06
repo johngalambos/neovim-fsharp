@@ -2,23 +2,33 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const child_process_1 = require("child_process");
 const readline_1 = require("readline");
-const os_1 = require("os");
-const onBufWrite = (nvim) => {
+var fsacHandle = null;
+const getLogger = (nvim) => (msg) => { };
+const getServer = () => {
+    if (fsacHandle) {
+        return fsacHandle;
+    }
+    fsacHandle = startServer();
+    return fsacHandle;
+};
+// when we open an FSharp file in vim
+const onBufEnter = (nvim) => {
     return () => {
-        nvim.command('echomsg "hello"');
-        console.log('unbufwrite4');
-        console.log('starting the server');
-        const serverHandle = startServer(nvim);
-        serverHandle.stdin.write('help' + os_1.EOL);
+        // const serverHandle = getServer();
+        // nvim.command('echomsg "hello"');
+        // console.log('unbufwrite4');
+        // console.log('starting the server');
+        // serverHandle.stdin.write('help' + EOL);
+        console.log('this should show up in the typescript log!');
         nvim.command('echomsg "I started the server"');
     };
 };
-const startServer = (nvim) => {
+const startServer = () => {
     let _rl;
     let serverHandle = null;
     let _cwd = process.cwd();
     let _env = process.env;
-    serverHandle = child_process_1.spawn('dotnet', ['/Users/john/code/FsAutoComplete/bin/release_netcore/fsautocomplete.dll']);
+    serverHandle = child_process_1.spawn('dotnet', ['C:/Users/john/code/FsAutoComplete/src/FsAutoComplete.netcore/bin/Release/netcoreapp2.0/fsautocomplete.dll']);
     _rl = readline_1.createInterface({
         input: serverHandle.stdout,
         output: serverHandle.stdin,
@@ -48,6 +58,9 @@ exports.default = (plugin) => {
     plugin.setOptions({
         dev: true
     });
-    console.log('initializing the plugin sucka2!!!');
-    plugin.registerAutocmd('BufWritePre', onBufWrite(plugin.nvim), { pattern: '*' });
+    //things we want to know about
+    // * when an fsharp file is 
+    // ** opened
+    // ** edited
+    plugin.registerAutocmd('BufEnter', onBufEnter(plugin.nvim), { pattern: '*.fs' });
 };

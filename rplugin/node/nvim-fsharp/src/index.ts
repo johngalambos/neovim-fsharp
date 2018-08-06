@@ -1,20 +1,35 @@
 import { spawn, ChildProcess } from 'child_process';
+import { Neovim } from 'neovim';
 import { createInterface } from 'readline';
 import { EOL } from 'os';
 
-const onBufWrite = (nvim) => {
+var fsacHandle = null;
+
+const getLogger = (nvim) => (msg:string): void => {};
+
+const getServer = () => {
+  if (fsacHandle) {
+    return fsacHandle;
+  }
+  fsacHandle = startServer();
+  return fsacHandle;
+};
+
+// when we open an FSharp file in vim
+const onBufEnter = (nvim: Neovim) => {
   return () => {
-    nvim.command('echomsg "hello"');
-    console.log('unbufwrite4');
-    console.log('starting the server');
-    const serverHandle = startServer(nvim);
-    serverHandle.stdin.write('help' + EOL);
+    // const serverHandle = getServer();
+    // nvim.command('echomsg "hello"');
+    // console.log('unbufwrite4');
+    // console.log('starting the server');
+    // serverHandle.stdin.write('help' + EOL);
+    console.log('this should show up in the typescript log!');
     nvim.command('echomsg "I started the server"');
   };
 };
 
 
-const startServer = (nvim) => {
+const startServer = () => {
 
   let _rl: any;
 
@@ -25,7 +40,7 @@ const startServer = (nvim) => {
 
   serverHandle = spawn(
     'dotnet',
-    ['/Users/john/code/FsAutoComplete/bin/release_netcore/fsautocomplete.dll']
+    ['C:/Users/john/code/FsAutoComplete/src/FsAutoComplete.netcore/bin/Release/netcoreapp2.0/fsautocomplete.dll']
   );
 
   _rl = createInterface({
@@ -64,8 +79,11 @@ export default (plugin) => {
   plugin.setOptions({
     dev: true
   });
-  console.log('initializing the plugin sucka2!!!');
-  plugin.registerAutocmd('BufWritePre', onBufWrite(plugin.nvim), { pattern: '*' });
+  //things we want to know about
+  // * when an fsharp file is 
+  // ** opened
+  // ** edited
+  plugin.registerAutocmd('BufEnter', onBufEnter(plugin.nvim), { pattern: '*.fs' });
 };
 
 
