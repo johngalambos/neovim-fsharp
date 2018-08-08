@@ -10,37 +10,29 @@ export const hello = () => 'Hello World';
 const getLogger = (nvim) => (msg:string): void => {
 };
 
-const getServer = () => {
+const checkServer = () => {
   if (serverHandle) {
-    return serverHandle;
+    return ;
   }
-  serverHandle = startServer();
-  return serverHandle;
+  startServer();
 };
 
-// when we open an FSharp file in vim
-const onBufEnter = (nvim: Neovim) => {
-  return () => {
+export const sendHelp = () => {
+  sendRequest('help\n');
+};
 
-    // const serverHandle = getServer();
-    // nvim.command('echomsg "hello"');
-    // console.log('unbufwrite4');
-    // console.log('starting the server');
-    // serverHandle.stdin.write('help' + EOL);
-    console.log('this should show up in the typescript log!');
-    nvim.command('echomsg "I started the server"');
-  };
+export const cleanup = () => {
+}
+
+const sendRequest = (msg:string) : void => {
+  checkServer();
+  serverHandle.send(msg);
 };
 
 
 const startServer = () => {
 
   let _rl: any;
-
-  let serverHandle: ChildProcess = null;
-
-  let _cwd = process.cwd();
-  let _env = process.env;
 
   serverHandle = spawn(
     'dotnet',
@@ -75,9 +67,22 @@ const startServer = () => {
   serverHandle.on('close', data => {
     console.log(`Close Event: ${data}`);
   });
-  return serverHandle;
-
 };
+
+// when we open an FSharp file in vim
+const onBufEnter = (nvim: Neovim) => {
+  return () => {
+
+    // const serverHandle = getServer();
+    // nvim.command('echomsg "hello"');
+    // console.log('unbufwrite4');
+    // console.log('starting the server');
+    // serverHandle.stdin.write('help' + EOL);
+    console.log('this should show up in the typescript log!');
+    nvim.command('echomsg "I started the server"');
+  };
+};
+
 
 export default (plugin) => {
   plugin.setOptions({
@@ -89,7 +94,4 @@ export default (plugin) => {
   // ** edited
   plugin.registerAutocmd('BufEnter', onBufEnter(plugin.nvim), { pattern: '*.fs' });
 };
-
-
-
 
