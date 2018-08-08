@@ -5,15 +5,22 @@
   "main": "./lib/index.js",
   "scripts": {
     "build": "tsc --pretty -p tsconfig.json",
-    "watch": "tsc --pretty -p tsconfig.json --watch true"
+    "watch": "tsc --pretty -p tsconfig.json --watch true",
+    "test": "mocha -r ts-node/register src/**/*.spec.ts"
   },
   "keywords": [],
   "author": "John Galambos <johnny.galambos@gmail.com>",
   "license": "MIT",
   "devDependencies": {
+    "@types/chai": "^4.1.4",
+    "@types/mocha": "^5.2.5",
     "@types/node": "^10.0.8",
     "@types/tmp": "0.0.33",
-    "tslint": "^5.4.3"
+    "chai": "^4.1.2",
+    "mocha": "^5.2.0",
+    "ts-node": "^7.0.0",
+    "tslint": "^5.4.3",
+    "typescript": "^3.0.1"
   },
   "dependencies": {
     "neovim": "^4.0.1",

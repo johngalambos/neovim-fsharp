@@ -3,21 +3,25 @@ import { Neovim } from 'neovim';
 import { createInterface } from 'readline';
 import { EOL } from 'os';
 
-var fsacHandle = null;
+var serverHandle:ChildProcess = null;
 
-const getLogger = (nvim) => (msg:string): void => {};
+export const hello = () => 'Hello World';
+
+const getLogger = (nvim) => (msg:string): void => {
+};
 
 const getServer = () => {
-  if (fsacHandle) {
-    return fsacHandle;
+  if (serverHandle) {
+    return serverHandle;
   }
-  fsacHandle = startServer();
-  return fsacHandle;
+  serverHandle = startServer();
+  return serverHandle;
 };
 
 // when we open an FSharp file in vim
 const onBufEnter = (nvim: Neovim) => {
   return () => {
+
     // const serverHandle = getServer();
     // nvim.command('echomsg "hello"');
     // console.log('unbufwrite4');
